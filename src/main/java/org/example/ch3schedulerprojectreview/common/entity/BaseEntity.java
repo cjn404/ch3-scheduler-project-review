@@ -58,6 +58,11 @@ public class BaseEntity {
      * persist() 또는 save() 호출 시 값이 할당
      */
     @Column(nullable = false, updatable = false)
+    /** @Column
+     * 생략 시 기본값으로 컬럼 생성 즉 제약 설정
+     * nullable 기본값: true
+     * updatable 기본값: true
+     */
     /** updatable
      *  updatable = true 기본값 -> 엔티티 업데이트 시 자동으로 갱신
      *  false 시 한번 저장되면 수정 불가 즉 고정
