@@ -31,8 +31,8 @@ import org.example.ch3schedulerprojectreview.common.entity.BaseEntity;
 /** @Getter
  * 클래스 내 모든 필드에 getter 메서드 자동 생성
  * 해당 어노테이션 덕분에
- * public LocalDateTime getCreatedAt() {
- *     return createdAt;
+ * public Long getScheduleId() {
+ *     return scheduleId;
  * }
  * 작성에서 해방 롬복 굿굿
  *
@@ -87,8 +87,7 @@ public class Schedule extends BaseEntity {    // BaseEntity 상속 -> 생성일 
 //    @JoinColumn(name = "user_id")    // 외래 키(FK) 매핑할 때 사용하는 JPA 어노테이션. FK 컬럼 이름 직접 지정
 //    private User user;    // Schedule 엔티티에서 User 객체를 직접 참조
 
-    /**
-    기본 생성자 -> 어노테이션으로 자동 생성
+    /** 기본 생성자 -> 어노테이션으로 자동 생성
     public Schedule() {
     }
     */
@@ -107,5 +106,14 @@ public class Schedule extends BaseEntity {    // BaseEntity 상속 -> 생성일 
      * 엔티티 = DB 데이터와 1:1로 매핑되는 객체
      * 엔티티 내부에서 자기 상태를 변경하는 로직을 가지면 응집도 상승
      * 위 상태 변경이 영속 상태(Persistent) 객체 + 트랜잭션 내에서 더티체킹 적용되어 DB 자동 업데이트
+     *
+     * 트랜잭션(Transaction): DB에서 수행되는 작업들의 한 묶음
+     *                     -> 모두 성공 또는 모두 실패해야만 함
+     */
+
+    /** getter -> 어노테이션으로 자동 생성
+     public Long getScheduleId() {
+         return scheduleId;
+     }
      */
 }
