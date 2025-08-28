@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ch3schedulerprojectreview.common.entity.BaseEntity;
 
+import java.time.LocalDateTime;
+
 @Entity
 /** Entity
  * 정의: DB 테이블과 1:1로 매핑되는 클래스
@@ -54,7 +56,7 @@ import org.example.ch3schedulerprojectreview.common.entity.BaseEntity;
  * : 기본 생성자의 접근 수준을 PROTECTED로 제한. 외부에서 무분별하게 new ...() 방지
  *   PROTECTED : 같은 패키지 또는 자식 클래스만 생성자 호출 가능
  */
-public class Schedule extends BaseEntity {    // BaseEntity 상속 -> 생성일 및 수정일 필드 자동 포함
+public class Schedule {
 
     @Id    // 해당 필드가 엔티티의 기본 키(PK)임을 명시
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -92,14 +94,24 @@ public class Schedule extends BaseEntity {    // BaseEntity 상속 -> 생성일 
     }
     */
 
-    public Schedule(String title, String content) {    // 파라미터가 있는 생성자. @NoArgsConstructor와 함께 사용
+    // 일정 시작 날짜 및 시간
+    private LocalDateTime startDateTime;
+
+    // 일정 종료 날짜 및 시간
+    private LocalDateTime endDateTime;
+
+    public Schedule(String title, String content, LocalDateTime startDateTime, LocalDateTime endDateTime) {    // 파라미터가 있는 생성자. @NoArgsConstructor와 함께 사용
         this.title = title;
         this.content = content;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
     }
 
-    public void updateSchedule(String title, String content) {
+    public void updateSchedule(String title, String content, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.title = title;
         this.content = content;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
     }
     /**
      * 객체지향적 설계 원칙(OOP)에 부합
