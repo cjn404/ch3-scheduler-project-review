@@ -9,10 +9,10 @@ package org.example.ch3schedulerprojectreview.common.entity;    // 공통(common
  *        더티 체킹(JPA가 객체의 변경을 감지해서 자동으로 DB를 업데이트)하여 DB에 자동 반영
  *        즉 JPA가 엔티티를 이용해 DB와 객체 간 가교 역할
  *      3. 상속을 통한 공통 속성 재사용
- * 영속 컨텍스트: JPA가 영속 상태의 엔티티 객체를 감시하는 저장소
+ * 영속성 컨텍스트: JPA가 영속 상태의 엔티티 객체를 감시하는 저장소
  *            JPA는 객체와 스냅샷(조회 시 객체 상태 복제) 관리
  * 더티 체킹: 더티 = 변경된 데이터
- *          트랜잭션이 끝날 때(commit 또는 flush 시점) 영속 컨텍스트 안의 스냅샷과 현재 엔티티의 필드값 비교
+ *          트랜잭션이 끝날 때(commit 또는 flush 시점) 영속성 컨텍스트 안의 스냅샷과 현재 엔티티의 필드값 비교
  *          객체의 값 변경 시 -> 자동으로 UPDATE SQL을 만들어 DB에 반영
  *          영속 상태 엔티티 + 트랜잭션 내에서만 동작
  */
@@ -22,7 +22,7 @@ import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 /** @CreatedDate,@LastModifiedDate
- * JAP의 감사(Auditing) 기능에서 날짜를 자동으로 기록
+ * JPA의 감사(Auditing) 기능에서 날짜를 자동으로 기록
  */
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -34,8 +34,8 @@ import java.time.LocalDateTime;
  * 클래스 내 모든 필드에 getter 메서드 자동 생성
  * 해당 어노테이션 덕분에
  * public LocalDateTime getCreatedAt() {
- *         return createdAt;
- *     }
+ *     return createdAt;
+ * }
  * 작성에서 해방 롬복 굿굿
  *
  * cf) Setter 안 쓰는 이유
@@ -54,9 +54,13 @@ import java.time.LocalDateTime;
  * 해당 어노테이션이 아닌 @Entity 사용 시 자체 테이블이 생기나 상속 관계 및 JOIN이 필요해짐
  */
 @EntityListeners(AuditingEntityListener.class)
-/**
- * 엔티티의 생성 및 수정 이벤트를 감지 및 자동 호출되는 리스너(AuditingEntityListener.class) 지정
- * JPA Auditing 기능을 활성화시켜 @CreatedDate, @LastModifiedDate가 작동하도록 함
+/** @EntityListeners
+ * JPA 엔티티에 특정 리스너 클래스를 지정하는 어노테이션
+ */
+/** AuditingEntityListener.class
+ * JPA의 감사(Auditing) 기능을 수행하는 리스너(AuditingEntityListener.class)
+ * 엔티티가 저장(Persist)되거나 수정(Update)될 때 이를 감지하는 JPA 라이프 사이클 이벤트를 활용해
+ * @CreatedDate, @LastModifiedDate 필드가 자동으로 채워지도록 지원
  */
 public class BaseEntity {
 
@@ -88,7 +92,7 @@ public class BaseEntity {
 
     /** JPA 기본 생성자
      * 컴파일러가 자동으로 기본 생성자 생성하므로 코드상 생략
-     * (파리미터가 있는)커스텀 생성자 추가 시, 기본 생성자 따로 정의해야 함
+     * (파라미터가 있는)커스텀 생성자 추가 시, 기본 생성자 따로 정의해야 함
      * protected BaseEntity() {    // 외부에서 마음대로 생성 못 하도록 제한(JPA는 protected나 public 생성자만 필요)
      *    }    // JPA가 리플렉션을 통해 객체 생성 시 내부 필드를 채워줌 -> 그래서 new ...() 안 해도 됨
      */
