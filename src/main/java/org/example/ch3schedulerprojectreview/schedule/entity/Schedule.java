@@ -56,6 +56,7 @@ import java.time.LocalDateTime;
  * : 기본 생성자의 접근 수준을 PROTECTED로 제한. 외부에서 무분별하게 new ...() 방지
  *   PROTECTED : 같은 패키지 또는 자식 클래스만 생성자 호출 가능
  */
+@Table(name = "schedule")    // 엔티티가 매핑될 실제 DB 테이블 이름을 지정
 public class Schedule {
 
     @Id    // 해당 필드가 엔티티의 기본 키(PK)임을 명시
