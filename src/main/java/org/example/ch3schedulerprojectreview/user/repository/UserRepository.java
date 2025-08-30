@@ -1,0 +1,7 @@
+package org.example.ch3schedulerprojectreview.user.repository;
+
+import org.example.ch3schedulerprojectreview.user.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User,Long> {
+}
