@@ -33,7 +33,7 @@ public class ScheduleController {
     }
 
     // 단건 조회
-    @GetMapping("/{scheduleId}")
+    @GetMapping("/{scheduleId:\\d+}")    // 숫자가 1개 이상 연속된 문자열만 허용. 그 외 입력 시 404 Not Found 반환
     public ResponseEntity<ScheduleResponse> findById(
             @PathVariable Long scheduleId
     ) {
@@ -41,7 +41,7 @@ public class ScheduleController {
     }
 
     // 수정
-    @PutMapping("/{scheduleId}")
+    @PutMapping("/{scheduleId:\\d+}")
     public ResponseEntity<ScheduleResponse> updateById(
             @PathVariable Long scheduleId,
             @RequestBody ScheduleRequest scheduleRequest
@@ -50,7 +50,7 @@ public class ScheduleController {
     }
 
     // 삭제
-    @DeleteMapping("/{scheduleId}")
+    @DeleteMapping("/{scheduleId:\\d+}")
     public ResponseEntity<Void> deleteById(
             @PathVariable Long scheduleId
     ) {
