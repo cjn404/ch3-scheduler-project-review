@@ -92,6 +92,7 @@ public class ScheduleService {
         );
     }
 
+    // 삭제
     @Transactional
     public void deleteById(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
