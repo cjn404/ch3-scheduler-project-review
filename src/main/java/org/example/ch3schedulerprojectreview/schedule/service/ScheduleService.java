@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -143,6 +144,10 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
+        // NSF
+        if (!Objects.equals(schedule.getUser().getUserId(), sessionUserId)) {
+            throw new UnauthorizedException("본인 일정만 복구 가능합니다.");
+        }
         // 복구
         schedule.restore();
     }

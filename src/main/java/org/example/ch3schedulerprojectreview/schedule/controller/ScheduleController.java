@@ -120,4 +120,22 @@ public class ScheduleController {
         scheduleService.deleteById(scheduleId, sessionUserId, deleteRequest);
         return ResponseEntity.noContent().build();
     }
+
+    // 복구
+    @PostMapping("/{scheduleId:\\d+}/restore")
+    public ResponseEntity<ScheduleResponse> restoreById(
+            @PathVariable Long scheduleId,
+            HttpServletRequest httpServletRequest
+    ) {
+        HttpSession session = httpServletRequest.getSession(false);
+        if (session == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (sessionUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        scheduleService.restoreById(scheduleId, sessionUserId);
+        return ResponseEntity.ok().build();
+    }
 }
