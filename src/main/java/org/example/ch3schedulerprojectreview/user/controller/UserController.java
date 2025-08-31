@@ -47,7 +47,7 @@ public class UserController {
             // 신규 세션 생성
             HttpSession session = servletRequest.getSession();
             // 세션 키 값
-            session.setAttribute(SessionKey.SESSION_KEY, response);
+            session.setAttribute(SessionKey.SESSION_KEY, response.getUserId());
             // 세션 만료 시간(30분) 설정
             session.setMaxInactiveInterval(30 * 60);
 
@@ -77,15 +77,15 @@ public class UserController {
         // 로그인하지 않으면 HttpSession -> Null로 반환
         HttpSession session = servletRequest.getSession(false);
         //  세션 존재 시 = 로그인이 된 경우
-        if (session != null) {
+        if (session == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        UserResponse response = (UserResponse) session.getAttribute(SessionKey.SESSION_KEY);
-        if (response == null) {
+        Long userId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         try {
-            userService.withdraw(response.getUserId());    // DB 삭제
+            userService.withdraw(userId);    // DB 삭제
             session.invalidate();    // 해당 세션(데이터) 삭제
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
@@ -100,7 +100,7 @@ public class UserController {
     ) {
         try {
             UserResponse response = userService.findById(userId);
-            return ResponseEntity.ok(userService.findById(userId));
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -118,15 +118,15 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         // 세션에서 사용자 정보 가져오기
-        UserResponse response = (UserResponse) session.getAttribute(SessionKey.SESSION_KEY);
-        if (response == null) {
+        Long userId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         try {
             // 서비스 호출
-            UserResponse updatedUser = userService.updateById(response.getUserId(), updateRequest);
+            UserResponse updatedUser = userService.updateById(userId, updateRequest);
             // 세션 갱신
-            session.setAttribute(SessionKey.SESSION_KEY, updatedUser);
+            session.setAttribute(SessionKey.SESSION_KEY, userId);
             // 30분 연장
             session.setMaxInactiveInterval(30 * 60);
             return ResponseEntity.ok(updatedUser);
