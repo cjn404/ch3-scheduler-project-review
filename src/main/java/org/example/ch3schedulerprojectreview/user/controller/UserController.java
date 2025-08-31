@@ -1,15 +1,11 @@
 package org.example.ch3schedulerprojectreview.user.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ch3schedulerprojectreview.common.constants.auth.SessionKey;
-import org.example.ch3schedulerprojectreview.user.dto.UserLoginRequest;
-import org.example.ch3schedulerprojectreview.user.dto.UserRequest;
-import org.example.ch3schedulerprojectreview.user.dto.UserResponse;
-import org.example.ch3schedulerprojectreview.user.dto.UserUpdateRequest;
+import org.example.ch3schedulerprojectreview.user.dto.*;
 import org.example.ch3schedulerprojectreview.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +23,8 @@ public class UserController {
     public ResponseEntity<UserResponse> signup(
             @Valid @RequestBody UserRequest request
     ) {
-        try {
-            UserResponse response = userService.signup(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        UserResponse response = userService.signup(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 로그인
@@ -41,20 +33,16 @@ public class UserController {
             @Valid @RequestBody UserLoginRequest loginRequest,
             HttpServletRequest servletRequest
     ) {
-        try {
-            UserResponse response = userService.login(loginRequest);
+        UserResponse response = userService.login(loginRequest);
 
-            // 신규 세션 생성
-            HttpSession session = servletRequest.getSession();
-            // 세션 키 값
-            session.setAttribute(SessionKey.SESSION_KEY, response.getUserId());
-            // 세션 만료 시간(30분) 설정
-            session.setMaxInactiveInterval(30 * 60);
+        // 신규 세션 생성
+        HttpSession session = servletRequest.getSession();
+        // 세션 키 값
+        session.setAttribute(SessionKey.SESSION_KEY, response.getUserId());
+        // 세션 만료 시간(30분) 설정
+        session.setMaxInactiveInterval(30 * 60);
 
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
     // 로그아웃
@@ -73,7 +61,9 @@ public class UserController {
 
     // 회원탈퇴
     @DeleteMapping("/me")
-    public ResponseEntity<Void> withdraw(HttpServletRequest servletRequest) {
+    public ResponseEntity<Void> withdraw(
+            HttpServletRequest servletRequest,
+            @RequestBody UserWithdrawRequest withdrawRequest) {
         // 로그인하지 않으면 HttpSession -> Null로 반환
         HttpSession session = servletRequest.getSession(false);
         //  세션 존재 시 = 로그인이 된 경우
@@ -84,13 +74,9 @@ public class UserController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            userService.withdraw(sessionUserId);    // DB 삭제
-            session.invalidate();    // 해당 세션(데이터) 삭제
-            return ResponseEntity.noContent().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        userService.withdraw(sessionUserId, withdrawRequest);    // DB 삭제
+        session.invalidate();    // 해당 세션(데이터) 삭제
+        return ResponseEntity.noContent().build();
     }
 
     // 조회
@@ -108,16 +94,12 @@ public class UserController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            UserResponse response = userService.findMe(sessionUserId);
-            // 세션 갱신
-            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-            // 30분 연장
-            session.setMaxInactiveInterval(30 * 60);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        UserResponse response = userService.findMe(sessionUserId);
+        // 세션 갱신
+        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+        // 30분 연장
+        session.setMaxInactiveInterval(30 * 60);
+        return ResponseEntity.ok(response);
     }
 
     // 수정
@@ -136,16 +118,12 @@ public class UserController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            // 서비스 호출
-            UserResponse updatedUser = userService.updateMe(sessionUserId, updateRequest);
-            // 세션 갱신
-            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-            // 30분 연장
-            session.setMaxInactiveInterval(30 * 60);
-            return ResponseEntity.ok(updatedUser);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        // 서비스 호출
+        UserResponse updatedUser = userService.updateMe(sessionUserId, updateRequest);
+        // 세션 갱신
+        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+        // 30분 연장
+        session.setMaxInactiveInterval(30 * 60);
+        return ResponseEntity.ok(updatedUser);
     }
 }

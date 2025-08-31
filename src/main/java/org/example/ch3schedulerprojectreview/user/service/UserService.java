@@ -1,11 +1,11 @@
 package org.example.ch3schedulerprojectreview.user.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.ch3schedulerprojectreview.user.dto.UserLoginRequest;
-import org.example.ch3schedulerprojectreview.user.dto.UserRequest;
-import org.example.ch3schedulerprojectreview.user.dto.UserResponse;
-import org.example.ch3schedulerprojectreview.user.dto.UserUpdateRequest;
+import org.example.ch3schedulerprojectreview.common.exception.custom.ConflictException;
+import org.example.ch3schedulerprojectreview.common.exception.custom.NotFoundException;
+import org.example.ch3schedulerprojectreview.common.exception.custom.UnauthorizedException;
+import org.example.ch3schedulerprojectreview.config.PasswordEncoder;
+import org.example.ch3schedulerprojectreview.user.dto.*;
 import org.example.ch3schedulerprojectreview.user.entity.User;
 import org.example.ch3schedulerprojectreview.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,19 +16,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원가입
     @Transactional
     public UserResponse signup(UserRequest request) {
         // "이메일"만 중복 여부 확인
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EntityNotFoundException("Email already exists");
+            throw new ConflictException("이미 사용 중인 이메일입니다.");
         }
+
+        // 평문 비밀번호 -> 해시 변환
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         // 유저 생성
         User user = new User(
                 request.getEmail(),
-                request.getPassword(),
+                encodedPassword,
                 request.getUserName()
         );
         userRepository.save(user);
@@ -50,8 +54,12 @@ public class UserService {
          * findByEmail 사용 시: DB 쿼리 1번으로 이메일 유무 여부 확인 + User 객체 가져오기 가능
          */
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(
-                () -> new EntityNotFoundException("User not found")
+                () -> new NotFoundException("해당하는 계정이 없습니다.")
         );
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+        }
+
         return new UserResponse(
                 user.getUserId(),
                 user.getEmail(),
@@ -62,10 +70,13 @@ public class UserService {
 
     // 회원탈퇴 - 소프트 딜리트 처리해야 해서 비즈니스 로직 필요
     @Transactional
-    public void withdraw(Long userId) {
+    public void withdraw(Long userId, UserWithdrawRequest withdrawRequest) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " not found")
+                () -> new NotFoundException("해당하는 계정이 없습니다.")
         );
+        if (!passwordEncoder.matches(withdrawRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+        }
         userRepository.delete(user);
     }
 
@@ -73,7 +84,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse findMe(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " not found")
+                () -> new NotFoundException("해당하는 계정이 없습니다.")
         );
         return new UserResponse(
                 user.getUserId(),
@@ -88,8 +99,11 @@ public class UserService {
     @Transactional
     public UserResponse updateMe(Long userId, UserUpdateRequest updateRequest) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " not found")
+                () -> new NotFoundException("해당하는 계정이 없습니다.")
         );
+        if (!passwordEncoder.matches(updateRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+        }
         user.updateUser(
                 updateRequest.getPassword(),
                 updateRequest.getUserName()
