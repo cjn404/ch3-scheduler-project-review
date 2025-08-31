@@ -58,7 +58,7 @@ public class ScheduleService {
     // 전체 조회
     @Transactional(readOnly = true)
     public List<ScheduleResponse> findAllMe(Long userId) {
-        List<Schedule> schedules = scheduleRepository.findByUserUserId(userId);
+        List<Schedule> schedules = scheduleRepository.findByUserUserIdAndDeletedFalse(userId);
         List<ScheduleResponse> dtos = new ArrayList<>();
         for (Schedule schedule : schedules) {
             User user = schedule.getUser();
@@ -81,7 +81,7 @@ public class ScheduleService {
     // 단건 조회
     @Transactional(readOnly = true)
     public ScheduleResponse findMe(Long scheduleId, Long sessionUserId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+        Schedule schedule = scheduleRepository.findByScheduleIdAndDeletedFalse(scheduleId).orElseThrow(
                 () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
         User user = schedule.getUser();

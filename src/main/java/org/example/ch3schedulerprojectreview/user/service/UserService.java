@@ -22,7 +22,7 @@ public class UserService {
     @Transactional
     public UserResponse signup(UserRequest request) {
         // "이메일"만 중복 여부 확인
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new ConflictException("이미 사용 중인 이메일입니다.");
         }
 
@@ -53,7 +53,7 @@ public class UserService {
          *                      => DB 쿼리 2번(exists + findByEmail) 실행하게 되는 셈
          * findByEmail 사용 시: DB 쿼리 1번으로 이메일 유무 여부 확인 + User 객체 가져오기 가능
          */
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(
+        User user = userRepository.findByEmailAndDeletedFalse(loginRequest.getEmail()).orElseThrow(
                 () -> new NotFoundException("해당하는 계정이 없습니다.")
         );
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
