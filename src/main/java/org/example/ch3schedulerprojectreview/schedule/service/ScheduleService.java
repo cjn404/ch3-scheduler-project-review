@@ -2,6 +2,9 @@ package org.example.ch3schedulerprojectreview.schedule.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.example.ch3schedulerprojectreview.common.exception.custom.UnauthorizedException;
+import org.example.ch3schedulerprojectreview.config.PasswordEncoder;
+import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleDeleteRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleResponse;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleUpdateRequest;
@@ -21,6 +24,7 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 생성
     @Transactional    // jakarta는 readOnly 기능 없음
@@ -119,10 +123,14 @@ public class ScheduleService {
 
     // 삭제
     @Transactional
-    public void deleteById(Long scheduleId, Long sessionUserId) {
+    public void deleteById(Long scheduleId, Long sessionUserId, ScheduleDeleteRequest deleteRequest) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
         );
+        User user = schedule.getUser();
+        if (!passwordEncoder.matches(deleteRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
+        }
         scheduleRepository.delete(schedule);
     }
 }
