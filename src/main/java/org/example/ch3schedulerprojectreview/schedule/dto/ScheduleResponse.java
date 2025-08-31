@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 public class ScheduleResponse {
 
     // 필드 final = 완전 불변
+    private final Long userId;
+    private final String email;
+    private final String userName;
     private final Long scheduleId;
     private final String title;
     private final String content;
@@ -17,12 +20,18 @@ public class ScheduleResponse {
 
     // 생성자: final 필드에 값 넣어주는 메서드
     public ScheduleResponse(
+            Long userId,
+            String email,
+            String userName,
             Long scheduleId,
             String title,
             String content,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     ) {
+        this.userId = userId;
+        this.email = email;
+        this.userName = userName;
         this.scheduleId = scheduleId;    // 좌: 객체의 필드. 우: 생성자의 매개변수
         this.title = title;
         this.content = content;
