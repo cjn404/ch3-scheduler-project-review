@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.ch3schedulerprojectreview.common.entity.BaseEntity;
+import org.example.ch3schedulerprojectreview.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -86,9 +86,9 @@ public class Schedule {
     @Column(length = 200)
     private String content;
 
-//    @ManyToOne(fetch = FetchType.LAZY)    // 필요할 때만 DB 조회(해당 User 객체가 실제 사용될 때 SELECT 발생)
-//    @JoinColumn(name = "user_id")    // 외래 키(FK) 매핑할 때 사용하는 JPA 어노테이션. FK 컬럼 이름 직접 지정
-//    private User user;    // Schedule 엔티티에서 User 객체를 직접 참조
+    @ManyToOne(fetch = FetchType.LAZY)    // 필요할 때만 DB 조회(해당 User 객체가 실제 사용될 때 SELECT 발생)
+    @JoinColumn(name = "user_id")    // 외래 키(FK) 매핑할 때 사용하는 JPA 어노테이션. FK 컬럼 이름 직접 지정
+    private User user;    // Schedule 엔티티에서 User 객체를 직접 참조
 
     /** 기본 생성자 -> 어노테이션으로 자동 생성
     public Schedule() {
@@ -101,14 +101,26 @@ public class Schedule {
     // 일정 종료 날짜 및 시간
     private LocalDateTime endDateTime;
 
-    public Schedule(String title, String content, LocalDateTime startDateTime, LocalDateTime endDateTime) {    // 파라미터가 있는 생성자. @NoArgsConstructor와 함께 사용
+    public Schedule(
+            String title,
+            String content,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            User user
+    ) {    // 파라미터가 있는 생성자. @NoArgsConstructor와 함께 사용
         this.title = title;
         this.content = content;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+        this.user = user;
     }
 
-    public void updateSchedule(String title, String content, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public void updateSchedule(
+            String title,
+            String content,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
+    ) {
         this.title = title;
         this.content = content;
         this.startDateTime = startDateTime;
