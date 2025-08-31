@@ -2,7 +2,6 @@ package org.example.ch3schedulerprojectreview.user.dto;
 
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
