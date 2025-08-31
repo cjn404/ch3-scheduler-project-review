@@ -1,4 +1,4 @@
-package org.example.ch3schedulerprojectreview.common.filter;
+package org.example.ch3schedulerprojectreview.common.filter.auth;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ public class FilterConfig {
         FilterRegistrationBean<LoginFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new LoginFilter());
         filterRegistrationBean.addUrlPatterns("/*");
-        filterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        filterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);    // 필터 순서
 
         return filterRegistrationBean;
     }
