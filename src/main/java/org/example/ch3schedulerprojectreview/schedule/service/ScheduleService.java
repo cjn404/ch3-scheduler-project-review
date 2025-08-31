@@ -58,7 +58,7 @@ public class ScheduleService {
     // 전체 조회
     @Transactional(readOnly = true)
     public List<ScheduleResponse> findAllMe(Long userId) {
-        List<Schedule> schedules = scheduleRepository.findByUserId(userId);
+        List<Schedule> schedules = scheduleRepository.findByUserUserId(userId);
         List<ScheduleResponse> dtos = new ArrayList<>();
         for (Schedule schedule : schedules) {
             User user = schedule.getUser();
