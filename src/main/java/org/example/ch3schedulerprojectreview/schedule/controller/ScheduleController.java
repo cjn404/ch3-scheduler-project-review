@@ -1,11 +1,11 @@
 package org.example.ch3schedulerprojectreview.schedule.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ch3schedulerprojectreview.common.constants.auth.SessionKey;
+import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleDeleteRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleResponse;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleUpdateRequest;
@@ -37,14 +37,10 @@ public class ScheduleController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            ScheduleResponse response = scheduleService.save(sessionUserId, request);
-            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-            session.setMaxInactiveInterval(30 * 60);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        ScheduleResponse response = scheduleService.save(sessionUserId, request);
+        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+        session.setMaxInactiveInterval(30 * 60);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 전체 조회
@@ -77,14 +73,11 @@ public class ScheduleController {
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } try {
-            ScheduleResponse response = scheduleService.findMe(scheduleId, sessionUserId);
-            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-            session.setMaxInactiveInterval(30 * 60);
-        return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        ScheduleResponse response = scheduleService.findMe(scheduleId, sessionUserId);
+        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+        session.setMaxInactiveInterval(30 * 60);
+        return ResponseEntity.ok(response);
     }
 
     // 수정
@@ -102,21 +95,18 @@ public class ScheduleController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            ScheduleResponse response = scheduleService.updateMe(scheduleId, sessionUserId, updateRequest);
-            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-            session.setMaxInactiveInterval(30 * 60);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        ScheduleResponse response = scheduleService.updateMe(scheduleId, sessionUserId, updateRequest);
+        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+        session.setMaxInactiveInterval(30 * 60);
+        return ResponseEntity.ok(response);
     }
 
     // 삭제
     @DeleteMapping("/{scheduleId:\\d+}")
     public ResponseEntity<Void> deleteById(
             @PathVariable Long scheduleId,
-            HttpServletRequest httpServletRequest
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody ScheduleDeleteRequest deleteRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session == null) {
@@ -126,11 +116,7 @@ public class ScheduleController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            scheduleService.deleteById(scheduleId, sessionUserId);
-            return ResponseEntity.noContent().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        scheduleService.deleteById(scheduleId, sessionUserId, deleteRequest);
+        return ResponseEntity.noContent().build();
     }
 }

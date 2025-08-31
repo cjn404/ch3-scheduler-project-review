@@ -2,6 +2,7 @@ package org.example.ch3schedulerprojectreview.schedule.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.example.ch3schedulerprojectreview.common.exception.custom.NotFoundException;
 import org.example.ch3schedulerprojectreview.common.exception.custom.UnauthorizedException;
 import org.example.ch3schedulerprojectreview.config.PasswordEncoder;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleDeleteRequest;
@@ -30,7 +31,8 @@ public class ScheduleService {
     @Transactional    // jakarta는 readOnly 기능 없음
     public ScheduleResponse save(Long userId, ScheduleRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " not found"));
+                () -> new NotFoundException("해당하는 계정이 없습니다.")
+        );
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContent(),
@@ -79,7 +81,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public ScheduleResponse findMe(Long scheduleId, Long sessionUserId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
+                () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
         User user = schedule.getUser();
 
@@ -99,7 +101,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponse updateMe(Long scheduleId, Long sessionUserId, ScheduleUpdateRequest updateRequest) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
+                () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
         schedule.updateSchedule(
                 updateRequest.getTitle(),
@@ -125,7 +127,7 @@ public class ScheduleService {
     @Transactional
     public void deleteById(Long scheduleId, Long sessionUserId, ScheduleDeleteRequest deleteRequest) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
+                () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
         User user = schedule.getUser();
         if (!passwordEncoder.matches(deleteRequest.getPassword(), user.getPassword())) {
