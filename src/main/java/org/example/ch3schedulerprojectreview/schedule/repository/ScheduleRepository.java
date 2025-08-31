@@ -3,7 +3,10 @@ package org.example.ch3schedulerprojectreview.schedule.repository;
 import org.example.ch3schedulerprojectreview.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ScheduleRepository extends JpaRepository<Schedule, Long> {    // Schedule = 엔티티 클래스. Long = 엔티티의 PK 타입. -> DB 테이블과 1:1 매핑
+import java.util.List;
+
+public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
+    List<Schedule> findByUserId(Long userId);    // Schedule = 엔티티 클래스. Long = 엔티티의 PK 타입. -> DB 테이블과 1:1 매핑
 }
 /** 인터페이스로 선언된 이유:
  * 기능 상속 받음으로 메서드 구현이 없어도 됨 -> 아니면 모든 CRUD 메서드 직접 구현해야 함

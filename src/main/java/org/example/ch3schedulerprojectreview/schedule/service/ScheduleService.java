@@ -4,8 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleResponse;
+import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleUpdateRequest;
 import org.example.ch3schedulerprojectreview.schedule.entity.Schedule;
 import org.example.ch3schedulerprojectreview.schedule.repository.ScheduleRepository;
+import org.example.ch3schedulerprojectreview.user.entity.User;
+import org.example.ch3schedulerprojectreview.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,19 +20,26 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     // 생성
     @Transactional    // jakarta는 readOnly 기능 없음
-    public ScheduleResponse save(ScheduleRequest request) {
+    public ScheduleResponse save(Long userId, ScheduleRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User with id " + userId + " not found"));
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContent(),
                 request.getStartDateTime(),
-                request.getEndDateTime()
+                request.getEndDateTime(),
+                user
         );
         Schedule savedSchedule = scheduleRepository.save(schedule);
 
         return new ScheduleResponse(
+                user.getUserId(),
+                user.getEmail(),
+                user.getUsername(),
                 savedSchedule.getScheduleId(),
                 savedSchedule.getTitle(),
                 savedSchedule.getContent(),
@@ -40,11 +50,16 @@ public class ScheduleService {
 
     // 전체 조회
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> findAll() {
-        List<Schedule> schedules = scheduleRepository.findAll();
+    public List<ScheduleResponse> findAllMe(Long userId) {
+        List<Schedule> schedules = scheduleRepository.findByUserId(userId);
         List<ScheduleResponse> dtos = new ArrayList<>();
         for (Schedule schedule : schedules) {
+            User user = schedule.getUser();
+
             ScheduleResponse scheduleResponse = new ScheduleResponse(
+                    user.getUserId(),
+                    user.getEmail(),
+                    user.getUsername(),
                     schedule.getScheduleId(),
                     schedule.getTitle(),
                     schedule.getContent(),
@@ -58,11 +73,16 @@ public class ScheduleService {
 
     // 단건 조회
     @Transactional(readOnly = true)
-    public ScheduleResponse findById(Long scheduleId) {
+    public ScheduleResponse findMe(Long scheduleId, Long sessionUserId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
         );
+        User user = schedule.getUser();
+
         return new ScheduleResponse(
+                user.getUserId(),
+                user.getEmail(),
+                user.getUsername(),
                 schedule.getScheduleId(),
                 schedule.getTitle(),
                 schedule.getContent(),
@@ -73,17 +93,22 @@ public class ScheduleService {
 
     // 수정
     @Transactional
-    public ScheduleResponse updateById(Long scheduleId, ScheduleRequest request) {
+    public ScheduleResponse updateMe(Long scheduleId, Long sessionUserId, ScheduleUpdateRequest updateRequest) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
         );
         schedule.updateSchedule(
-                request.getTitle(),
-                request.getContent(),
-                request.getStartDateTime(),
-                request.getEndDateTime()
+                updateRequest.getTitle(),
+                updateRequest.getContent(),
+                updateRequest.getStartDateTime(),
+                updateRequest.getEndDateTime()
         );
+        User user = schedule.getUser();
+
         return new ScheduleResponse(
+                user.getUserId(),
+                user.getEmail(),
+                user.getUsername(),
                 schedule.getScheduleId(),
                 schedule.getTitle(),
                 schedule.getContent(),
@@ -94,7 +119,7 @@ public class ScheduleService {
 
     // 삭제
     @Transactional
-    public void deleteById(Long scheduleId) {
+    public void deleteById(Long scheduleId, Long sessionUserId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new EntityNotFoundException("Schedule with id " + scheduleId + " not found")
         );
