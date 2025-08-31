@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.ch3schedulerprojectreview.common.entity.BaseEntity;
 import org.example.ch3schedulerprojectreview.user.entity.User;
 
 import java.time.LocalDateTime;
@@ -57,7 +58,7 @@ import java.time.LocalDateTime;
  *   PROTECTED : 같은 패키지 또는 자식 클래스만 생성자 호출 가능
  */
 @Table(name = "schedule")    // 엔티티가 매핑될 실제 DB 테이블 이름을 지정
-public class Schedule {
+public class Schedule extends BaseEntity {
 
     @Id    // 해당 필드가 엔티티의 기본 키(PK)임을 명시
     @GeneratedValue(strategy = GenerationType.IDENTITY)

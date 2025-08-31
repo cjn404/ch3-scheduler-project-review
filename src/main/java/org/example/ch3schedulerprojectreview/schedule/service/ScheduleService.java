@@ -133,6 +133,17 @@ public class ScheduleService {
         if (!passwordEncoder.matches(deleteRequest.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
         }
-        scheduleRepository.delete(schedule);
+        // Soft Delete
+        schedule.softDelete();      // deleted = true
+    }
+
+    // 복구
+    @Transactional
+    public void restoreById(Long scheduleId, Long sessionUserId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new NotFoundException("해당하는 일정이 없습니다.")
+        );
+        // 복구
+        schedule.restore();
     }
 }

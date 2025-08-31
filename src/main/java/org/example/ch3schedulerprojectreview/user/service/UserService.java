@@ -77,7 +77,8 @@ public class UserService {
         if (!passwordEncoder.matches(withdrawRequest.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
         }
-        userRepository.delete(user);
+        // Soft Delete
+        user.softDelete();      // deleted = true
     }
 
     // 조회
@@ -116,5 +117,4 @@ public class UserService {
                 user.getModifiedAt()
         );
     }
-
 }
