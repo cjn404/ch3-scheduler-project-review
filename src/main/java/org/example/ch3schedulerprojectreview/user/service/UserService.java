@@ -105,8 +105,12 @@ public class UserService {
         if (!passwordEncoder.matches(updateRequest.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
         }
+        // 비밀번호 수정으로 평문 입력된 비밀번호 해시화
+        String plainPassword = updateRequest.getPassword();
+        String encodedPassword = passwordEncoder.encode(plainPassword);
+
         user.updateUser(
-                updateRequest.getPassword(),
+                encodedPassword,
                 updateRequest.getUserName()
         );
         return new UserResponse(
