@@ -71,7 +71,7 @@ public class UserService {
 
     // 조회
     @Transactional(readOnly = true)
-    public UserResponse findById(Long userId) {
+    public UserResponse findMe(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("User with id " + userId + " not found")
         );
@@ -86,7 +86,7 @@ public class UserService {
 
     // 수정
     @Transactional
-    public UserResponse updateById(Long userId, UserUpdateRequest updateRequest) {
+    public UserResponse updateMe(Long userId, UserUpdateRequest updateRequest) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("User with id " + userId + " not found")
         );

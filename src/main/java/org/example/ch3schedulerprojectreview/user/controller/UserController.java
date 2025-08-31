@@ -80,12 +80,12 @@ public class UserController {
         if (session == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Long userId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (userId == null) {
+        Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         try {
-            userService.withdraw(userId);    // DB 삭제
+            userService.withdraw(sessionUserId);    // DB 삭제
             session.invalidate();    // 해당 세션(데이터) 삭제
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
@@ -94,12 +94,26 @@ public class UserController {
     }
 
     // 조회
-    @GetMapping("/{userId:\\d+}")
-    public ResponseEntity<UserResponse> findById(
-            @PathVariable Long userId
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> findMe(
+            HttpServletRequest servletRequest
     ) {
+        // 세션 Null 체크
+        HttpSession session = servletRequest.getSession(false);
+        if (session == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // 세션에서 사용자 정보 가져오기
+        Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (sessionUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
-            UserResponse response = userService.findById(userId);
+            UserResponse response = userService.findMe(sessionUserId);
+            // 세션 갱신
+            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
+            // 30분 연장
+            session.setMaxInactiveInterval(30 * 60);
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -108,7 +122,7 @@ public class UserController {
 
     // 수정
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> updatedUser(
+    public ResponseEntity<UserResponse> updatedMe(
             HttpServletRequest servletRequest,
             @RequestBody UserUpdateRequest updateRequest
     ) {
@@ -118,15 +132,15 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         // 세션에서 사용자 정보 가져오기
-        Long userId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (userId == null) {
+        Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
+        if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         try {
             // 서비스 호출
-            UserResponse updatedUser = userService.updateById(userId, updateRequest);
+            UserResponse updatedUser = userService.updateMe(sessionUserId, updateRequest);
             // 세션 갱신
-            session.setAttribute(SessionKey.SESSION_KEY, userId);
+            session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
             // 30분 연장
             session.setMaxInactiveInterval(30 * 60);
             return ResponseEntity.ok(updatedUser);
