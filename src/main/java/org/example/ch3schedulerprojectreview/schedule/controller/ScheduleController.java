@@ -125,7 +125,8 @@ public class ScheduleController {
     @PostMapping("/{scheduleId:\\d+}/restore")
     public ResponseEntity<ScheduleResponse> restoreById(
             @PathVariable Long scheduleId,
-            HttpServletRequest httpServletRequest
+            HttpServletRequest httpServletRequest,
+            @RequestBody ScheduleDeleteRequest deleteRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session == null) {
@@ -135,7 +136,7 @@ public class ScheduleController {
         if (sessionUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        scheduleService.restoreById(scheduleId, sessionUserId);
+        scheduleService.restoreById(scheduleId, sessionUserId, deleteRequest);
         return ResponseEntity.ok().build();
     }
 }

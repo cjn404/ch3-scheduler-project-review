@@ -140,13 +140,17 @@ public class ScheduleService {
 
     // 복구
     @Transactional
-    public void restoreById(Long scheduleId, Long sessionUserId) {
+    public void restoreById(Long scheduleId, Long sessionUserId, ScheduleDeleteRequest deleteRequest) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new NotFoundException("해당하는 일정이 없습니다.")
         );
+        User user = schedule.getUser();
         // NSF
-        if (!Objects.equals(schedule.getUser().getUserId(), sessionUserId)) {
+        if (!Objects.equals(user.getUserId(), sessionUserId)) {
             throw new UnauthorizedException("본인 일정만 복구 가능합니다.");
+        }
+        if (!passwordEncoder.matches(deleteRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
         }
         // 복구
         schedule.restore();
