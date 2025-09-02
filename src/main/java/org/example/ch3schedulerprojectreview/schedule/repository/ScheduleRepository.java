@@ -1,13 +1,15 @@
 package org.example.ch3schedulerprojectreview.schedule.repository;
 
 import org.example.ch3schedulerprojectreview.schedule.entity.Schedule;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
-    List<Schedule> findByUserUserIdAndDeletedFalse(Long userId);    // Schedule = 엔티티 클래스. Long = 엔티티의 PK 타입. -> DB 테이블과 1:1 매핑
+    Page<Schedule> findByUserUserIdAndDeletedFalse(Long userId, Pageable pageable);    // Schedule = 엔티티 클래스. Long = 엔티티의 PK 타입. -> DB 테이블과 1:1 매핑
 
     Optional<Schedule> findByScheduleIdAndDeletedFalse(Long scheduleId);
 }

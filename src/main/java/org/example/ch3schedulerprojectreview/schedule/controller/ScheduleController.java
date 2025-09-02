@@ -11,6 +11,10 @@ import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleResponse;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleUpdateRequest;
 import org.example.ch3schedulerprojectreview.schedule.service.ScheduleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +50,10 @@ public class ScheduleController {
 
     // 전체 조회
     @GetMapping
-    public ResponseEntity<List<ScheduleResponse>> findAllMe(
-            HttpServletRequest httpServletRequest
+    public ResponseEntity<Page<ScheduleResponse>> findAllMe(
+            HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session == null) {
@@ -57,7 +63,9 @@ public class ScheduleController {
         if (sessionUserId == null) {
             throw new UnauthorizedException("로그인해 주세요.");
         }
-        List<ScheduleResponse> responses = scheduleService.findAllMe(sessionUserId);
+        // 정렬 고정(생성일 기준, 내림차순)
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<ScheduleResponse> responses = scheduleService.findAllMe(sessionUserId, pageable);
         return ResponseEntity.ok(responses);
     }
 

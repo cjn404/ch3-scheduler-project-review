@@ -13,6 +13,8 @@ import org.example.ch3schedulerprojectreview.schedule.entity.Schedule;
 import org.example.ch3schedulerprojectreview.schedule.repository.ScheduleRepository;
 import org.example.ch3schedulerprojectreview.user.entity.User;
 import org.example.ch3schedulerprojectreview.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,13 +59,12 @@ public class ScheduleService {
 
     // 전체 조회
     @Transactional(readOnly = true)
-    public List<ScheduleResponse> findAllMe(Long userId) {
-        List<Schedule> schedules = scheduleRepository.findByUserUserIdAndDeletedFalse(userId);
-        List<ScheduleResponse> dtos = new ArrayList<>();
-        for (Schedule schedule : schedules) {
+    public Page<ScheduleResponse> findAllMe(Long userId, Pageable pageable) {
+        Page<Schedule> schedules = scheduleRepository.findByUserUserIdAndDeletedFalse(userId, pageable);
+        // map을 이용해 DTO로 변환
+        return schedules.map(schedule -> {
             User user = schedule.getUser();
-
-            ScheduleResponse scheduleResponse = new ScheduleResponse(
+            return new ScheduleResponse(
                     user.getUserId(),
                     user.getEmail(),
                     user.getUsername(),
@@ -73,9 +74,7 @@ public class ScheduleService {
                     schedule.getStartDateTime(),
                     schedule.getEndDateTime()
             );
-            dtos.add(scheduleResponse);
-        }
-        return dtos;
+        });
     }
 
     // 단건 조회
