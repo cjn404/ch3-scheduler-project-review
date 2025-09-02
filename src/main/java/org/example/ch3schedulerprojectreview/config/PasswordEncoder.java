@@ -3,7 +3,7 @@ package org.example.ch3schedulerprojectreview.config;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component    // 스프링이 관리하는 Bean임을 표시
 public class PasswordEncoder {
 
     public String encode(String rawPassword) {
