@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ch3schedulerprojectreview.common.constants.auth.SessionKey;
-import org.example.ch3schedulerprojectreview.common.exception.custom.UnauthorizedException;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleDeleteRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleRequest;
 import org.example.ch3schedulerprojectreview.schedule.dto.ScheduleResponse;
@@ -35,16 +34,9 @@ public class ScheduleController {
             HttpServletRequest httpServletRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
+
         ScheduleResponse response = scheduleService.save(sessionUserId, request);
-        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-        session.setMaxInactiveInterval(30 * 60);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -56,13 +48,8 @@ public class ScheduleController {
             @RequestParam(defaultValue = "10") int size
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
+
         // 정렬 고정(생성일 기준, 내림차순)
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<ScheduleResponse> responses = scheduleService.findAllMe(sessionUserId, pageable);
@@ -76,16 +63,9 @@ public class ScheduleController {
             HttpServletRequest httpServletRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
+
         ScheduleResponse response = scheduleService.findMe(scheduleId, sessionUserId);
-        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-        session.setMaxInactiveInterval(30 * 60);
         return ResponseEntity.ok(response);
     }
 
@@ -97,16 +77,9 @@ public class ScheduleController {
             @Valid @RequestBody ScheduleUpdateRequest updateRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
+
         ScheduleResponse response = scheduleService.updateMe(scheduleId, sessionUserId, updateRequest);
-        session.setAttribute(SessionKey.SESSION_KEY, sessionUserId);
-        session.setMaxInactiveInterval(30 * 60);
         return ResponseEntity.ok(response);
     }
 
@@ -118,13 +91,8 @@ public class ScheduleController {
             @Valid @RequestBody ScheduleDeleteRequest deleteRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            throw new UnauthorizedException("로그인해 주세요.");
-        }
+
         scheduleService.deleteById(scheduleId, sessionUserId, deleteRequest);
         return ResponseEntity.noContent().build();
     }
@@ -137,13 +105,8 @@ public class ScheduleController {
             @RequestBody ScheduleDeleteRequest deleteRequest
     ) {
         HttpSession session = httpServletRequest.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         Long sessionUserId = (Long) session.getAttribute(SessionKey.SESSION_KEY);
-        if (sessionUserId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+
         scheduleService.restoreById(scheduleId, sessionUserId, deleteRequest);
         return ResponseEntity.ok().build();
     }
