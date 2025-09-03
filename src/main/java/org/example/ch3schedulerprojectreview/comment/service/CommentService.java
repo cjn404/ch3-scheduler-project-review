@@ -45,39 +45,40 @@ public class CommentService {
     /*
     Hibernate:
     select
-    s1_0.schedule_id,
-    s1_0.content,
-    s1_0.created_at,
-    s1_0.deleted,
-    s1_0.end_date_time,
-    s1_0.modified_at,
-    s1_0.start_date_time,
-    s1_0.title,
-    s1_0.user_id
-            from
-    schedule s1_0
+        s1_0.schedule_id,
+        s1_0.content,
+        s1_0.created_at,
+        s1_0.deleted,
+        s1_0.end_date_time,
+        s1_0.modified_at,
+        s1_0.start_date_time,
+        s1_0.title,
+        s1_0.user_id
+    from
+        schedule s1_0
     where
-    s1_0.schedule_id=?
-    Hibernate:
+        s1_0.schedule_id=?
+Hibernate:
     select
-    u1_0.user_id,
-    u1_0.created_at,
-    u1_0.deleted,
-    u1_0.email,
-    u1_0.modified_at,
-    u1_0.password,
-    u1_0.username
-            from
-    user u1_0
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted,
+        u1_0.email,
+        u1_0.modified_at,
+        u1_0.password,
+        u1_0.username
+    from
+        user u1_0
     where
-    u1_0.user_id=?
-    Hibernate:
+        u1_0.user_id=?
+Hibernate:
     insert
-            into
-    comment
-            (comment, created_at, deleted, modified_at, schedule_id, user_id)
+    into
+        comment
+        (comment, created_at, deleted, modified_at, schedule_id, user_id)
     values
-            (?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?)
+
     */
 
     // 생성
@@ -114,61 +115,52 @@ public class CommentService {
     /*
     Hibernate:
     select
-    c1_0.id,
-    c1_0.comment,
-    c1_0.created_at,
-    c1_0.deleted,
-    c1_0.modified_at,
-    c1_0.schedule_id,
-    c1_0.user_id
-            from
-    comment c1_0
-    left join
-    user u1_0
-    on u1_0.user_id=c1_0.user_id
-            where
-    u1_0.user_id=?
+        c1_0.id,
+        c1_0.comment,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.modified_at,
+        s1_0.schedule_id,
+        s1_0.content,
+        s1_0.created_at,
+        s1_0.deleted,
+        s1_0.end_date_time,
+        s1_0.modified_at,
+        s1_0.start_date_time,
+        s1_0.title,
+        s1_0.user_id,
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted,
+        u1_0.email,
+        u1_0.modified_at,
+        u1_0.password,
+        u1_0.username
+    from
+        comment c1_0
+    join
+        user u1_0
+            on u1_0.user_id=c1_0.user_id
+    join
+        schedule s1_0
+            on s1_0.schedule_id=c1_0.schedule_id
+    where
+        u1_0.user_id=?
+    order by
+        c1_0.created_at desc
     limit
         ?
-    Hibernate:
-    select
-    s1_0.schedule_id,
-    s1_0.content,
-    s1_0.created_at,
-    s1_0.deleted,
-    s1_0.end_date_time,
-    s1_0.modified_at,
-    s1_0.start_date_time,
-    s1_0.title,
-    s1_0.user_id
-            from
-    schedule s1_0
-    where
-    s1_0.schedule_id=?
-    Hibernate:
-    select
-    u1_0.user_id,
-    u1_0.created_at,
-    u1_0.deleted,
-    u1_0.email,
-    u1_0.modified_at,
-    u1_0.password,
-    u1_0.username
-            from
-    user u1_0
-    where
-    u1_0.user_id=?
     */
 
     // 유저 아이디 기준 전체 조회
     @Transactional(readOnly = true)
     public Page<CommentResponse> findAllByUserId(Long userId, Pageable pageable) {
         // 유저 기준 댓글 전체 조회
-        Page<Comment> comments = commentRepository.findAllByUser_UserId(userId, pageable);
+        Page<Comment> comments = commentRepository.findAllByUser_UserId(userId, pageable);    // 댓글 목록 조회
         return comments.map(comment -> {
-            Schedule schedule = comment.getSchedule(); // comment에서 schedule 가져오기
+            Schedule schedule = comment.getSchedule();    // 댓글 달린 일정 조회. SELECT * FROM schedule WHERE schedule_id = ?
             ScheduleResponse scheduleResponse = new ScheduleResponse(
-                    schedule.getUser().getUserId(),
+                    schedule.getUser().getUserId(),    // 일정마다 유저를 DB에서 가져오기 위해 쿼리 발생
                     schedule.getUser().getEmail(),
                     schedule.getUser().getUsername(),
                     schedule.getScheduleId(),
@@ -180,7 +172,7 @@ public class CommentService {
             return new CommentResponse(
                     scheduleResponse,
                     comment.getId(),
-                    comment.getUser().getUsername(),
+                    comment.getUser().getUsername(),    // 댓글마다 유저를 DB에서 가져오기 위해 쿼리 발생
                     comment.getComment(),
                     comment.getCreatedAt(),
                     comment.getModifiedAt());
@@ -190,50 +182,56 @@ public class CommentService {
     /*
     Hibernate:
     select
-    s1_0.schedule_id,
-    s1_0.content,
-    s1_0.created_at,
-    s1_0.deleted,
-    s1_0.end_date_time,
-    s1_0.modified_at,
-    s1_0.start_date_time,
-    s1_0.title,
-    s1_0.user_id
-            from
-    schedule s1_0
+        s1_0.schedule_id,
+        s1_0.content,
+        s1_0.created_at,
+        s1_0.deleted,
+        s1_0.end_date_time,
+        s1_0.modified_at,
+        s1_0.start_date_time,
+        s1_0.title,
+        s1_0.user_id
+    from
+        schedule s1_0
     where
-    s1_0.schedule_id=?
-    Hibernate:
+        s1_0.schedule_id=?
+Hibernate:
     select
-    c1_0.id,
-    c1_0.comment,
-    c1_0.created_at,
-    c1_0.deleted,
-    c1_0.modified_at,
-    c1_0.schedule_id,
-    c1_0.user_id
-            from
-    comment c1_0
-    left join
-    schedule s1_0
-    on s1_0.schedule_id=c1_0.schedule_id
-            where
-    s1_0.schedule_id=?
+        c1_0.id,
+        c1_0.comment,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.modified_at,
+        s1_0.schedule_id,
+        s1_0.content,
+        s1_0.created_at,
+        s1_0.deleted,
+        s1_0.end_date_time,
+        s1_0.modified_at,
+        s1_0.start_date_time,
+        s1_0.title,
+        s1_0.user_id,
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted,
+        u1_0.email,
+        u1_0.modified_at,
+        u1_0.password,
+        u1_0.username
+    from
+        comment c1_0
+    join
+        user u1_0
+            on u1_0.user_id=c1_0.user_id
+    join
+        schedule s1_0
+            on s1_0.schedule_id=c1_0.schedule_id
+    where
+        u1_0.user_id=?
+    order by
+        c1_0.created_at desc
     limit
         ?
-    Hibernate:
-    select
-    u1_0.user_id,
-    u1_0.created_at,
-    u1_0.deleted,
-    u1_0.email,
-    u1_0.modified_at,
-    u1_0.password,
-    u1_0.username
-            from
-    user u1_0
-    where
-    u1_0.user_id=?
     */
 
     // 일정 아이디 기준 전체 조회
@@ -266,56 +264,56 @@ public class CommentService {
     /*
     Hibernate:
     select
-    c1_0.id,
-    c1_0.comment,
-    c1_0.created_at,
-    c1_0.deleted,
-    c1_0.modified_at,
-    c1_0.schedule_id,
-    c1_0.user_id
-            from
-    comment c1_0
+        c1_0.id,
+        c1_0.comment,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.modified_at,
+        c1_0.schedule_id,
+        c1_0.user_id
+    from
+        comment c1_0
     where
-    c1_0.id=?
-    Hibernate:
+        c1_0.id=?
+Hibernate:
     select
-    s1_0.schedule_id,
-    s1_0.content,
-    s1_0.created_at,
-    s1_0.deleted,
-    s1_0.end_date_time,
-    s1_0.modified_at,
-    s1_0.start_date_time,
-    s1_0.title,
-    s1_0.user_id
-            from
-    schedule s1_0
+        s1_0.schedule_id,
+        s1_0.content,
+        s1_0.created_at,
+        s1_0.deleted,
+        s1_0.end_date_time,
+        s1_0.modified_at,
+        s1_0.start_date_time,
+        s1_0.title,
+        s1_0.user_id
+    from
+        schedule s1_0
     where
-    s1_0.schedule_id=?
-    Hibernate:
+        s1_0.schedule_id=?
+Hibernate:
     select
-    u1_0.user_id,
-    u1_0.created_at,
-    u1_0.deleted,
-    u1_0.email,
-    u1_0.modified_at,
-    u1_0.password,
-    u1_0.username
-            from
-    user u1_0
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted,
+        u1_0.email,
+        u1_0.modified_at,
+        u1_0.password,
+        u1_0.username
+    from
+        user u1_0
     where
-    u1_0.user_id=?
-    Hibernate:
+        u1_0.user_id=?
+Hibernate:
     update
-            comment
+        comment
     set
-    comment=?,
-    deleted=?,
-    modified_at=?,
-    schedule_id=?,
-    user_id=?
+        comment=?,
+        deleted=?,
+        modified_at=?,
+        schedule_id=?,
+        user_id=?
     where
-    id=?
+        id=?
     */
 
     // 수정
@@ -352,41 +350,41 @@ public class CommentService {
     /*
     Hibernate:
     select
-    c1_0.id,
-    c1_0.comment,
-    c1_0.created_at,
-    c1_0.deleted,
-    c1_0.modified_at,
-    c1_0.schedule_id,
-    c1_0.user_id
-            from
-    comment c1_0
+        c1_0.id,
+        c1_0.comment,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.modified_at,
+        c1_0.schedule_id,
+        c1_0.user_id
+    from
+        comment c1_0
     where
-    c1_0.id=?
-    Hibernate:
+        c1_0.id=?
+Hibernate:
     select
-    u1_0.user_id,
-    u1_0.created_at,
-    u1_0.deleted,
-    u1_0.email,
-    u1_0.modified_at,
-    u1_0.password,
-    u1_0.username
-            from
-    user u1_0
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted,
+        u1_0.email,
+        u1_0.modified_at,
+        u1_0.password,
+        u1_0.username
+    from
+        user u1_0
     where
-    u1_0.user_id=?
-    Hibernate:
+        u1_0.user_id=?
+Hibernate:
     update
-            comment
+        comment
     set
-    comment=?,
-    deleted=?,
-    modified_at=?,
-    schedule_id=?,
-    user_id=?
+        comment=?,
+        deleted=?,
+        modified_at=?,
+        schedule_id=?,
+        user_id=?
     where
-    id=?
+        id=?
     */
 
     // 삭제
@@ -403,6 +401,6 @@ public class CommentService {
             throw new UnauthorizedException("본인 댓글만 삭제 가능합니다.");
         }
         comment.softDelete();
-        commentRepository.save(comment);
+//        commentRepository.save(comment);    // 명시적과 다르다. 걍 중복 행위 Save는 준영속->영속 상태로 바꾸는 것
     }
 }

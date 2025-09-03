@@ -171,7 +171,7 @@ public class UserService {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");    // 401
         }
         // 유저의 모든 스케줄 조회 * -> 유저가 스케줄을 반복문
-        // 조건을 특정해서 쿼리문 줄이기 -> update schedule s set s.isDeleted = ture where s.user_id = 1;
+        // 조건을 특정해서 쿼리문 줄이기 -> update schedule s set s.isDeleted = ture where s.user_id = 1; -> 새로 만든다. 쿼리메서드
         List<Schedule> schedules = scheduleRepository.findByUserUserIdAndDeletedFalse(userId);
         for (Schedule schedule : schedules) {
             schedule.softDelete();  // Schedule deleted = true

@@ -8,6 +8,7 @@ import org.example.ch3schedulerprojectreview.comment.dto.CommentResponse;
 import org.example.ch3schedulerprojectreview.comment.service.CommentService;
 import org.example.ch3schedulerprojectreview.common.constants.auth.SessionKey;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,12 @@ public class CommentController {
             @PathVariable Long userId,
             @PageableDefault Pageable pageable
     ) {
-        Page<CommentResponse> response = commentService.findAllByUserId(userId, pageable);
+        int pageNumber = pageable.getPageNumber() - 1;
+        if (pageNumber < 0) pageNumber = 0;
+        Pageable correctedPageable = PageRequest.of(
+                pageNumber, pageable.getPageSize(), pageable.getSort());    // pageNumber, 10, Sort.by("createdAt").descending());
+
+        Page<CommentResponse> response = commentService.findAllByUserId(userId, correctedPageable);
         return ResponseEntity.ok(response);
     }
 
@@ -51,7 +57,12 @@ public class CommentController {
             @PathVariable Long scheduleId,
             @PageableDefault Pageable pageable
     ) {
-        Page<CommentResponse> response = commentService.findAllByScheduleId(scheduleId, pageable);
+        int pageNumber = pageable.getPageNumber() - 1;    // 굳이 할 필요 없음...
+        if (pageNumber < 0) pageNumber = 0;
+        Pageable correctedPageable = PageRequest.of(
+                pageNumber, pageable.getPageSize(), pageable.getSort());    // pageNumber, 10, Sort.by("createdAt").descending());
+
+        Page<CommentResponse> response = commentService.findAllByScheduleId(scheduleId, correctedPageable);
         return ResponseEntity.ok(response);
     }
 
